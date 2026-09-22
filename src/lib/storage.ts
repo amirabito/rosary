@@ -1,16 +1,20 @@
 const KEY = 'rosary:prefs'
 
 export interface Prefs {
-  decadeCount: number
+  selectedIndices: number[]
 }
 
-const DEFAULT_PREFS: Prefs = { decadeCount: 5 }
+const DEFAULT_PREFS: Prefs = { selectedIndices: [0, 1, 2, 3, 4] }
 
 export function loadPrefs(): Prefs {
   try {
     const raw = localStorage.getItem(KEY)
     if (!raw) return DEFAULT_PREFS
-    return { ...DEFAULT_PREFS, ...JSON.parse(raw) }
+    const parsed = { ...DEFAULT_PREFS, ...JSON.parse(raw) }
+    if (!Array.isArray(parsed.selectedIndices) || parsed.selectedIndices.length === 0) {
+      return DEFAULT_PREFS
+    }
+    return parsed
   } catch {
     return DEFAULT_PREFS
   }

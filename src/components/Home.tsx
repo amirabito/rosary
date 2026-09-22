@@ -4,21 +4,36 @@ import { loadPrefs, savePrefs } from '../lib/storage'
 import type { MysteryType } from '../types'
 
 interface Props {
-  onBegin: (mysteryType: MysteryType, decadeCount: number) => void
+  onBegin: (mysteryType: MysteryType, selectedIndices: number[]) => void
 }
 
 export function Home({ onBegin }: Props) {
   const today = new Date()
   const todaysMystery = getMysteryForDay(today)
   const [mysteryType, setMysteryType] = useState<MysteryType>(todaysMystery)
-  const [decadeCount, setDecadeCount] = useState(() => loadPrefs().decadeCount)
+  const [selected, setSelected] = useState<number[]>(() => loadPrefs().selectedIndices)
 
   const mysteries = MYSTERIES[mysteryType]
   const isToday = mysteryType === todaysMystery
+  const isFull = selected.length === mysteries.length
+
+  function toggle(i: number) {
+    setSelected((prev) => {
+      if (prev.includes(i)) {
+        if (prev.length === 1) return prev // always keep at least one selected
+        return prev.filter((x) => x !== i)
+      }
+      return [...prev, i].sort((a, b) => a - b)
+    })
+  }
+
+  function selectFullRosary() {
+    setSelected(mysteries.map((_, i) => i))
+  }
 
   function handleBegin() {
-    savePrefs({ decadeCount })
-    onBegin(mysteryType, decadeCount)
+    savePrefs({ selectedIndices: selected })
+    onBegin(mysteryType, selected)
   }
 
   return (
@@ -39,15 +54,6 @@ export function Home({ onBegin }: Props) {
         </div>
         <p className="mt-1 text-lg font-bold text-brand-400">{mysteryType} Mysteries</p>
 
-        <ol className="mt-3 space-y-1.5 text-sm text-slate-300">
-          {mysteries.map((m, i) => (
-            <li key={m.title} className="flex gap-2">
-              <span className="text-slate-500">{i + 1}.</span>
-              <span>{m.title}</span>
-            </li>
-          ))}
-        </ol>
-
         <div className="mt-4 flex flex-wrap gap-2">
           {MYSTERY_TYPES.map((type) => (
             <button
@@ -65,21 +71,48 @@ export function Home({ onBegin }: Props) {
       </div>
 
       <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-4">
-        <h2 className="text-sm font-semibold text-white">Decades to pray</h2>
-        <p className="mt-1 text-xs text-slate-500">A full Rosary is 5 decades. Pray fewer if you're short on time.</p>
-        <div className="mt-3 flex gap-2">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              type="button"
-              onClick={() => setDecadeCount(n)}
-              className={`h-11 w-11 rounded-full text-sm font-semibold ${
-                n === decadeCount ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-300 active:bg-slate-700'
-              }`}
-            >
-              {n}
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-white">Which mysteries?</h2>
+          {!isFull && (
+            <button type="button" onClick={selectFullRosary} className="text-xs text-brand-400">
+              Select full Rosary
             </button>
-          ))}
+          )}
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          {isFull
+            ? 'Praying all 5 decades, with the full opening prayers.'
+            : `Praying ${selected.length} decade${selected.length === 1 ? '' : 's'} — straight into the meditation, no opening prayers.`}
+        </p>
+
+        <div className="mt-3 space-y-2">
+          {mysteries.map((m, i) => {
+            const checked = selected.includes(i)
+            return (
+              <button
+                key={m.title}
+                type="button"
+                onClick={() => toggle(i)}
+                aria-pressed={checked}
+                className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                  checked
+                    ? 'border-brand-600 bg-brand-950/40 text-white'
+                    : 'border-slate-800 bg-slate-950/40 text-slate-400 active:bg-slate-800'
+                }`}
+              >
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold ${
+                    checked ? 'border-brand-500 bg-brand-600 text-white' : 'border-slate-700 text-transparent'
+                  }`}
+                >
+                  &#10003;
+                </span>
+                <span>
+                  {i + 1}. {m.title}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
 

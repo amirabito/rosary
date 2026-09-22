@@ -4,12 +4,12 @@ import type { MysteryType } from '../types'
 
 interface Props {
   mysteryType: MysteryType
-  decadeCount: number
+  selectedIndices: number[]
   onExit: () => void
 }
 
-export function PraySession({ mysteryType, decadeCount, onExit }: Props) {
-  const steps = useMemo(() => buildRosarySteps(mysteryType, decadeCount), [mysteryType, decadeCount])
+export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
+  const steps = useMemo(() => buildRosarySteps(mysteryType, selectedIndices), [mysteryType, selectedIndices])
   const [index, setIndex] = useState(0)
   const [done, setDone] = useState(false)
 
@@ -35,7 +35,8 @@ export function PraySession({ mysteryType, decadeCount, onExit }: Props) {
         <p className="text-4xl">&#10013;</p>
         <h1 className="mt-4 text-xl font-bold text-white">Rosary Complete</h1>
         <p className="mt-2 text-sm text-slate-400">
-          You prayed the {mysteryType} Mysteries &mdash; {decadeCount} decade{decadeCount === 1 ? '' : 's'}.
+          You prayed the {mysteryType} Mysteries &mdash; {selectedIndices.length} decade
+          {selectedIndices.length === 1 ? '' : 's'}.
         </p>
         <button
           type="button"
