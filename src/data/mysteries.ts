@@ -31,7 +31,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Annunciation',
         artist: 'Fra Angelico',
         year: 'c. 1440–1445',
-        commonsFile: 'Fra Angelico - Annunciation - San Marco Cell 3.jpg',
+        wikiQuery: 'Fra Angelico Annunciation San Marco painting',
       },
     },
     {
@@ -43,7 +43,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Visitation',
         artist: 'Domenico Ghirlandaio',
         year: '1491',
-        commonsFile: 'Domenico Ghirlandaio - Visitation - WGA8825.jpg',
+        wikiQuery: 'Domenico Ghirlandaio The Visitation painting',
       },
     },
     {
@@ -55,7 +55,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'Mystic Nativity',
         artist: 'Sandro Botticelli',
         year: '1500',
-        commonsFile: 'Sandro Botticelli - Mystic Nativity - National Gallery London.jpg',
+        wikiQuery: 'Sandro Botticelli Mystic Nativity painting',
       },
     },
     {
@@ -67,7 +67,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'Presentation at the Temple',
         artist: 'Ambrogio Lorenzetti',
         year: '1342',
-        commonsFile: 'Ambrogio Lorenzetti - Presentation at the Temple - Uffizi.jpg',
+        wikiQuery: 'Ambrogio Lorenzetti Presentation at the Temple painting',
       },
     },
     {
@@ -79,7 +79,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Finding of the Saviour in the Temple',
         artist: 'William Holman Hunt',
         year: '1860',
-        commonsFile: 'William Holman Hunt - The Finding of the Saviour in the Temple.jpg',
+        wikiQuery: 'William Holman Hunt The Finding of the Saviour in the Temple',
       },
     },
   ],
@@ -93,7 +93,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'Agony in the Garden',
         artist: 'Giovanni Bellini',
         year: 'c. 1465',
-        commonsFile: 'Giovanni Bellini - Agony in the Garden - National Gallery London.jpg',
+        wikiQuery: 'Giovanni Bellini Agony in the Garden painting',
       },
     },
     {
@@ -105,7 +105,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Flagellation of Christ',
         artist: 'Caravaggio',
         year: '1607',
-        commonsFile: 'Michelangelo Merisi da Caravaggio - Flagellation of Christ - Capodimonte.jpg',
+        wikiQuery: 'Caravaggio The Flagellation of Christ Capodimonte painting',
       },
     },
     {
@@ -117,7 +117,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Crowning with Thorns',
         artist: 'Titian',
         year: '1542',
-        commonsFile: 'Titian - The Crowning with Thorns - Louvre.jpg',
+        wikiQuery: 'Titian The Crowning with Thorns Louvre painting',
       },
     },
     {
@@ -129,7 +129,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'Christ Carrying the Cross',
         artist: 'Titian',
         year: 'c. 1565',
-        commonsFile: 'Titian - Christ Carrying the Cross.jpg',
+        wikiQuery: 'Titian Christ Carrying the Cross painting',
       },
     },
     {
@@ -141,7 +141,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'Christ Crucified',
         artist: 'Diego Velázquez',
         year: '1632',
-        commonsFile: 'Diego Velázquez - Christ on the Cross - Prado.jpg',
+        wikiQuery: 'Diego Velázquez Christ Crucified Prado painting',
       },
     },
   ],
@@ -155,7 +155,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Resurrection',
         artist: 'Piero della Francesca',
         year: 'c. 1463–1465',
-        commonsFile: 'Piero della Francesca - Resurrection - Sansepolcro.jpg',
+        wikiQuery: 'Piero della Francesca The Resurrection painting Sansepolcro',
       },
     },
     {
@@ -167,7 +167,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Ascension of Christ',
         artist: 'Rembrandt',
         year: '1636',
-        commonsFile: 'Rembrandt - The Ascension of Christ.jpg',
+        wikiQuery: 'Rembrandt The Ascension of Christ painting',
       },
     },
     {
@@ -179,7 +179,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'Pentecost',
         artist: 'El Greco',
         year: 'c. 1596–1600',
-        commonsFile: 'El Greco - Pentecost - Prado.jpg',
+        wikiQuery: 'El Greco Pentecost painting Prado',
       },
     },
     {
@@ -191,7 +191,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'Assumption of the Virgin',
         artist: 'Titian',
         year: '1516–1518',
-        commonsFile: 'Titian - Assumption of the Virgin - Santa Maria dei Frari - Venice.jpg',
+        wikiQuery: 'Titian Assumption of the Virgin Frari painting',
       },
     },
     {
@@ -203,7 +203,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Coronation of the Virgin',
         artist: 'Diego Velázquez',
         year: 'c. 1641–1644',
-        commonsFile: 'Diego Velázquez - The Coronation of the Virgin - Prado.jpg',
+        wikiQuery: 'Diego Velázquez The Coronation of the Virgin painting',
       },
     },
   ],
@@ -217,7 +217,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Baptism of Christ',
         artist: 'Piero della Francesca',
         year: 'c. 1448–1450',
-        commonsFile: 'Piero della Francesca - Baptism of Christ - National Gallery London.jpg',
+        wikiQuery: 'Piero della Francesca The Baptism of Christ painting',
       },
     },
     {
@@ -229,7 +229,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Wedding at Cana',
         artist: 'Paolo Veronese',
         year: '1563',
-        commonsFile: 'Paolo Veronese - The Wedding at Cana - Louvre.jpg',
+        wikiQuery: 'Paolo Veronese The Wedding at Cana painting Louvre',
       },
     },
     {
@@ -241,7 +241,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Sermon of the Beatitudes',
         artist: 'James Tissot',
         year: 'c. 1886–1896',
-        commonsFile: 'Brooklyn Museum - The Sermon of the Beatitudes (Le sermon des béatitudes) - James Tissot.jpg',
+        wikiQuery: 'James Tissot The Sermon of the Beatitudes painting',
       },
     },
     {
@@ -253,7 +253,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Transfiguration',
         artist: 'Raphael',
         year: '1516–1520',
-        commonsFile: 'Transfiguration Raphael.jpg',
+        wikiQuery: 'Raphael The Transfiguration painting Vatican',
       },
     },
     {
@@ -265,7 +265,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         title: 'The Last Supper',
         artist: 'Leonardo da Vinci',
         year: '1495–1498',
-        commonsFile: 'Leonardo da Vinci (1452-1519) - The Last Supper (1495-1498).jpg',
+        wikiQuery: 'Leonardo da Vinci The Last Supper painting',
       },
     },
   ],

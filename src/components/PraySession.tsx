@@ -1,11 +1,19 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { buildRosarySteps } from '../lib/flow'
+import * as music from '../lib/music'
 import type { Artwork, MysteryType } from '../types'
 
 interface Props {
   mysteryType: MysteryType
   selectedIndices: number[]
+  initialMusicEnabled: boolean
   onExit: () => void
+}
+
+interface WikiImageSearchResponse {
+  query?: {
+    pages?: Record<string, { original?: { source?: string } }>
+  }
 }
 
 function BeadRow({ current, total }: { current: number; total: number }) {
@@ -29,11 +37,44 @@ function BeadRow({ current, total }: { current: number; total: number }) {
   )
 }
 
+/**
+ * Looks up the artwork's image live via the Wikipedia API (rather than a
+ * hardcoded file URL) so it doesn't depend on guessing an exact Commons file
+ * name. Fails silently — the reflection text works fine with no image.
+ */
 function MysteryArt({ artwork }: { artwork: Artwork }) {
+  const [src, setSrc] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
-  if (failed) return null
 
-  const src = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(artwork.commonsFile)}?width=900`
+  useEffect(() => {
+    let cancelled = false
+    setSrc(null)
+    setFailed(false)
+
+    const url =
+      'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=1&prop=pageimages&piprop=original&format=json&origin=*&gsrsearch=' +
+      encodeURIComponent(artwork.wikiQuery)
+
+    fetch(url)
+      .then((res) => res.json() as Promise<WikiImageSearchResponse>)
+      .then((data) => {
+        if (cancelled) return
+        const pages = data.query?.pages
+        const page = pages ? Object.values(pages)[0] : undefined
+        const imageUrl = page?.original?.source
+        if (imageUrl) setSrc(imageUrl)
+        else setFailed(true)
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [artwork.wikiQuery])
+
+  if (failed || !src) return null
 
   return (
     <figure className="-mx-5 -mt-5 mb-1 overflow-hidden rounded-t-xl">
@@ -51,10 +92,15 @@ function MysteryArt({ artwork }: { artwork: Artwork }) {
   )
 }
 
-export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
+export function PraySession({ mysteryType, selectedIndices, initialMusicEnabled, onExit }: Props) {
   const steps = useMemo(() => buildRosarySteps(mysteryType, selectedIndices), [mysteryType, selectedIndices])
   const [index, setIndex] = useState(0)
   const [done, setDone] = useState(false)
+  const [musicEnabled, setMusicEnabled] = useState(initialMusicEnabled)
+
+  // Music is started (possibly muted) from Home's Begin click, since that's the
+  // user gesture browsers require; this only fades it out on the way out.
+  useEffect(() => music.dispose, [])
 
   const step = steps[index]
   const isFirst = index === 0
@@ -62,6 +108,7 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
 
   function handleNext() {
     if (isLast) {
+      music.dispose()
       setDone(true)
       return
     }
@@ -70,6 +117,18 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
 
   function handleBack() {
     setIndex((i) => Math.max(i - 1, 0))
+  }
+
+  function handleExit() {
+    music.dispose()
+    onExit()
+  }
+
+  function toggleMusic() {
+    const next = !musicEnabled
+    setMusicEnabled(next)
+    music.saveMusicPref(next)
+    music.setMuted(!next)
   }
 
   if (done) {
@@ -95,12 +154,23 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 pb-8 pt-6">
       <div className="flex items-center justify-between">
-        <button type="button" onClick={onExit} className="text-sm text-slate-500 active:text-slate-300">
+        <button type="button" onClick={handleExit} className="text-sm text-slate-500 active:text-slate-300">
           &times; Exit
         </button>
-        <span className="text-xs text-slate-500">
-          {index + 1} / {steps.length}
-        </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleMusic}
+            aria-pressed={musicEnabled}
+            aria-label={musicEnabled ? 'Turn background music off' : 'Turn background music on'}
+            className={`text-base ${musicEnabled ? 'text-brand-400' : 'text-slate-700'}`}
+          >
+            &#9834;
+          </button>
+          <span className="text-xs text-slate-500">
+            {index + 1} / {steps.length}
+          </span>
+        </div>
       </div>
 
       <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-slate-800">
@@ -118,7 +188,11 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
 
       {step.beadTotal && step.beadIndex && <BeadRow current={step.beadIndex} total={step.beadTotal} />}
 
-      <div className="mt-3 flex flex-1 flex-col justify-center overflow-y-auto py-2">
+      <button
+        type="button"
+        onClick={handleNext}
+        className="mt-3 flex flex-1 flex-col justify-center overflow-y-auto rounded-xl py-2 text-left active:bg-slate-900/40"
+      >
         <h1 className="text-center text-2xl font-bold text-white">{step.title}</h1>
 
         {step.kind === 'announce' ? (
@@ -137,24 +211,18 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
         ) : (
           <p className="mt-4 whitespace-pre-line text-center text-lg leading-relaxed text-slate-200">{step.text}</p>
         )}
-      </div>
+      </button>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-4 flex items-center justify-between">
         <button
           type="button"
           onClick={handleBack}
           disabled={isFirst}
-          className="flex-1 rounded-xl border border-slate-800 py-3.5 text-sm font-medium text-slate-300 disabled:opacity-30 active:bg-slate-800"
+          className="rounded-lg px-3 py-2 text-sm text-slate-400 disabled:opacity-20 active:text-slate-200"
         >
-          Back
+          &lsaquo; Back
         </button>
-        <button
-          type="button"
-          onClick={handleNext}
-          className="flex-[2] rounded-xl bg-brand-600 py-3.5 text-base font-semibold text-white active:bg-brand-700"
-        >
-          {isLast ? 'Finish' : 'Next'}
-        </button>
+        <p className="text-xs text-slate-600">{isLast ? 'Tap to finish' : 'Tap anywhere to continue'}</p>
       </div>
     </div>
   )

@@ -4,8 +4,8 @@ export interface Artwork {
   title: string
   artist: string
   year: string
-  /** Exact Wikimedia Commons file title (no "File:" prefix, no domain). */
-  commonsFile: string
+  /** Search query used to find the artwork's image live via the Wikipedia API. */
+  wikiQuery: string
 }
 
 export interface Mystery {
