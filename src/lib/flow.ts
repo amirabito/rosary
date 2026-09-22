@@ -32,6 +32,8 @@ export function buildRosarySteps(mysteryType: MysteryType, selectedIndices: numb
         title: 'Hail Mary',
         text: PRAYERS.hailMary,
         progress: `Hail Mary ${i + 1} of 3 — ${intent}`,
+        beadIndex: i + 1,
+        beadTotal: 3,
       })
     })
 
@@ -48,6 +50,7 @@ export function buildRosarySteps(mysteryType: MysteryType, selectedIndices: numb
       text: mystery.title,
       fruit: mystery.fruit,
       reflection: mystery.reflection,
+      artwork: mystery.artwork,
       progress: label,
     })
 
@@ -59,6 +62,8 @@ export function buildRosarySteps(mysteryType: MysteryType, selectedIndices: numb
         title: 'Hail Mary',
         text: PRAYERS.hailMary,
         progress: `${label} — Hail Mary ${hm} of 10`,
+        beadIndex: hm,
+        beadTotal: 10,
       })
     }
 

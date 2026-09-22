@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { DAY_NAMES, MYSTERIES, MYSTERY_TYPES, getMysteryForDay } from '../data/mysteries'
-import { loadPrefs, savePrefs } from '../lib/storage'
 import type { MysteryType } from '../types'
 
 interface Props {
@@ -11,20 +10,15 @@ export function Home({ onBegin }: Props) {
   const today = new Date()
   const todaysMystery = getMysteryForDay(today)
   const [mysteryType, setMysteryType] = useState<MysteryType>(todaysMystery)
-  const [selected, setSelected] = useState<number[]>(() => loadPrefs().selectedIndices)
+  const [selected, setSelected] = useState<number[]>([])
 
   const mysteries = MYSTERIES[mysteryType]
   const isToday = mysteryType === todaysMystery
   const isFull = selected.length === mysteries.length
+  const canBegin = selected.length > 0
 
   function toggle(i: number) {
-    setSelected((prev) => {
-      if (prev.includes(i)) {
-        if (prev.length === 1) return prev // always keep at least one selected
-        return prev.filter((x) => x !== i)
-      }
-      return [...prev, i].sort((a, b) => a - b)
-    })
+    setSelected((prev) => (prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i].sort((a, b) => a - b)))
   }
 
   function selectFullRosary() {
@@ -32,7 +26,7 @@ export function Home({ onBegin }: Props) {
   }
 
   function handleBegin() {
-    savePrefs({ selectedIndices: selected })
+    if (!canBegin) return
     onBegin(mysteryType, selected)
   }
 
@@ -80,9 +74,11 @@ export function Home({ onBegin }: Props) {
           )}
         </div>
         <p className="mt-1 text-xs text-slate-500">
-          {isFull
-            ? 'Praying all 5 decades, with the full opening prayers.'
-            : `Praying ${selected.length} decade${selected.length === 1 ? '' : 's'} — straight into the meditation, no opening prayers.`}
+          {selected.length === 0
+            ? 'Tap the mysteries you want to pray.'
+            : isFull
+              ? 'Praying all 5 decades, with the full opening prayers.'
+              : `Praying ${selected.length} decade${selected.length === 1 ? '' : 's'} — straight into the meditation, no opening prayers.`}
         </p>
 
         <div className="mt-3 space-y-2">
@@ -119,9 +115,10 @@ export function Home({ onBegin }: Props) {
       <button
         type="button"
         onClick={handleBegin}
-        className="mt-6 w-full rounded-xl bg-brand-600 py-3.5 text-base font-semibold text-white active:bg-brand-700"
+        disabled={!canBegin}
+        className="mt-6 w-full rounded-xl bg-brand-600 py-3.5 text-base font-semibold text-white active:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
       >
-        Begin the Rosary &rarr;
+        {canBegin ? 'Begin the Rosary →' : 'Choose at least one mystery'}
       </button>
     </div>
   )

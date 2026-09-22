@@ -1,11 +1,54 @@
 import { useMemo, useState } from 'react'
 import { buildRosarySteps } from '../lib/flow'
-import type { MysteryType } from '../types'
+import type { Artwork, MysteryType } from '../types'
 
 interface Props {
   mysteryType: MysteryType
   selectedIndices: number[]
   onExit: () => void
+}
+
+function BeadRow({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="mt-4 flex items-center justify-center gap-1.5" aria-label={`Hail Mary ${current} of ${total}`}>
+      {Array.from({ length: total }, (_, i) => {
+        const n = i + 1
+        if (n === current) {
+          return (
+            <span
+              key={n}
+              className="h-3.5 w-3.5 rounded-full bg-brand-400 ring-2 ring-brand-300/50 ring-offset-2 ring-offset-slate-950"
+            />
+          )
+        }
+        return (
+          <span key={n} className={`h-2.5 w-2.5 rounded-full ${n < current ? 'bg-brand-700' : 'bg-slate-700'}`} />
+        )
+      })}
+    </div>
+  )
+}
+
+function MysteryArt({ artwork }: { artwork: Artwork }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return null
+
+  const src = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(artwork.commonsFile)}?width=900`
+
+  return (
+    <figure className="-mx-5 -mt-5 mb-1 overflow-hidden rounded-t-xl">
+      <img
+        src={src}
+        alt={`${artwork.title} by ${artwork.artist}`}
+        loading="lazy"
+        onError={() => setFailed(true)}
+        className="max-h-64 w-full object-cover"
+      />
+      <figcaption className="bg-slate-950/60 px-3 py-1.5 text-center text-[11px] italic text-slate-500">
+        {artwork.artist}, <span className="not-italic">{artwork.title}</span>, {artwork.year}
+      </figcaption>
+    </figure>
+  )
 }
 
 export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
@@ -73,11 +116,14 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
         </p>
       )}
 
-      <div className="mt-3 flex flex-1 flex-col justify-center">
+      {step.beadTotal && step.beadIndex && <BeadRow current={step.beadIndex} total={step.beadTotal} />}
+
+      <div className="mt-3 flex flex-1 flex-col justify-center overflow-y-auto py-2">
         <h1 className="text-center text-2xl font-bold text-white">{step.title}</h1>
 
         {step.kind === 'announce' ? (
           <div className="mt-4 space-y-4 rounded-xl border border-slate-800 bg-slate-900 p-5">
+            {step.artwork && <MysteryArt key={step.text} artwork={step.artwork} />}
             <p className="text-center text-lg font-semibold text-brand-300">{step.text}</p>
             {step.fruit && (
               <p className="text-center text-xs uppercase tracking-wide text-slate-500">
