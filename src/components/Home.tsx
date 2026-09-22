@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { DAY_NAMES, MYSTERIES, MYSTERY_TYPES, getMysteryForDay } from '../data/mysteries'
-import * as music from '../lib/music'
 import type { MysteryType } from '../types'
 
 interface Props {
-  onBegin: (mysteryType: MysteryType, selectedIndices: number[], musicEnabled: boolean) => void
+  onBegin: (mysteryType: MysteryType, selectedIndices: number[]) => void
 }
 
 export function Home({ onBegin }: Props) {
@@ -12,7 +11,6 @@ export function Home({ onBegin }: Props) {
   const todaysMystery = getMysteryForDay(today)
   const [mysteryType, setMysteryType] = useState<MysteryType>(todaysMystery)
   const [selected, setSelected] = useState<number[]>([])
-  const [musicEnabled, setMusicEnabled] = useState(() => music.loadMusicPref())
 
   const mysteries = MYSTERIES[mysteryType]
   const isToday = mysteryType === todaysMystery
@@ -29,12 +27,7 @@ export function Home({ onBegin }: Props) {
 
   function handleBegin() {
     if (!canBegin) return
-    // Must run synchronously inside this click handler so browsers treat it as
-    // a user-gesture-triggered audio start, even if music begins muted.
-    music.ensureStarted()
-    music.setMuted(!musicEnabled)
-    music.saveMusicPref(musicEnabled)
-    onBegin(mysteryType, selected, musicEnabled)
+    onBegin(mysteryType, selected)
   }
 
   return (
@@ -121,24 +114,16 @@ export function Home({ onBegin }: Props) {
 
       <button
         type="button"
-        onClick={() => setMusicEnabled((v) => !v)}
-        aria-pressed={musicEnabled}
-        className="mt-6 flex w-full items-center justify-between rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 text-sm"
-      >
-        <span className="text-slate-300">Background music while praying</span>
-        <span className={musicEnabled ? 'font-medium text-brand-400' : 'text-slate-600'}>
-          {musicEnabled ? 'On' : 'Off'}
-        </span>
-      </button>
-
-      <button
-        type="button"
         onClick={handleBegin}
         disabled={!canBegin}
-        className="mt-3 w-full rounded-xl bg-brand-600 py-3.5 text-base font-semibold text-white active:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+        className="mt-6 w-full rounded-xl bg-brand-600 py-3.5 text-base font-semibold text-white active:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
       >
         {canBegin ? 'Begin the Rosary →' : 'Choose at least one mystery'}
       </button>
+
+      <p className="mt-3 text-center text-xs text-slate-600">
+        Background music plays softly while you pray — the &#9834; button in the corner turns it on or off anytime.
+      </p>
     </div>
   )
 }

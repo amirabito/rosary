@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { buildRosarySteps } from '../lib/flow'
-import * as music from '../lib/music'
 import type { Artwork, MysteryType } from '../types'
 
 interface Props {
   mysteryType: MysteryType
   selectedIndices: number[]
-  initialMusicEnabled: boolean
   onExit: () => void
 }
 
@@ -92,15 +90,10 @@ function MysteryArt({ artwork }: { artwork: Artwork }) {
   )
 }
 
-export function PraySession({ mysteryType, selectedIndices, initialMusicEnabled, onExit }: Props) {
+export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
   const steps = useMemo(() => buildRosarySteps(mysteryType, selectedIndices), [mysteryType, selectedIndices])
   const [index, setIndex] = useState(0)
   const [done, setDone] = useState(false)
-  const [musicEnabled, setMusicEnabled] = useState(initialMusicEnabled)
-
-  // Music is started (possibly muted) from Home's Begin click, since that's the
-  // user gesture browsers require; this only fades it out on the way out.
-  useEffect(() => music.dispose, [])
 
   const step = steps[index]
   const isFirst = index === 0
@@ -108,7 +101,6 @@ export function PraySession({ mysteryType, selectedIndices, initialMusicEnabled,
 
   function handleNext() {
     if (isLast) {
-      music.dispose()
       setDone(true)
       return
     }
@@ -117,18 +109,6 @@ export function PraySession({ mysteryType, selectedIndices, initialMusicEnabled,
 
   function handleBack() {
     setIndex((i) => Math.max(i - 1, 0))
-  }
-
-  function handleExit() {
-    music.dispose()
-    onExit()
-  }
-
-  function toggleMusic() {
-    const next = !musicEnabled
-    setMusicEnabled(next)
-    music.saveMusicPref(next)
-    music.setMuted(!next)
   }
 
   if (done) {
@@ -154,23 +134,12 @@ export function PraySession({ mysteryType, selectedIndices, initialMusicEnabled,
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col px-4 pb-8 pt-6">
       <div className="flex items-center justify-between">
-        <button type="button" onClick={handleExit} className="text-sm text-slate-500 active:text-slate-300">
+        <button type="button" onClick={onExit} className="text-sm text-slate-500 active:text-slate-300">
           &times; Exit
         </button>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={toggleMusic}
-            aria-pressed={musicEnabled}
-            aria-label={musicEnabled ? 'Turn background music off' : 'Turn background music on'}
-            className={`text-base ${musicEnabled ? 'text-brand-400' : 'text-slate-700'}`}
-          >
-            &#9834;
-          </button>
-          <span className="text-xs text-slate-500">
-            {index + 1} / {steps.length}
-          </span>
-        </div>
+        <span className="text-xs text-slate-500">
+          {index + 1} / {steps.length}
+        </span>
       </div>
 
       <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-slate-800">
@@ -213,7 +182,7 @@ export function PraySession({ mysteryType, selectedIndices, initialMusicEnabled,
         )}
       </button>
 
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex items-center justify-between pr-14">
         <button
           type="button"
           onClick={handleBack}
