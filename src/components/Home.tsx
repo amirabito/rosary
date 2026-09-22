@@ -120,10 +120,6 @@ export function Home({ onBegin }: Props) {
       >
         {canBegin ? 'Begin the Rosary →' : 'Choose at least one mystery'}
       </button>
-
-      <p className="mt-3 text-center text-xs text-slate-600">
-        Background music plays softly while you pray — the &#9834; button in the corner turns it on or off anytime.
-      </p>
     </div>
   )
 }

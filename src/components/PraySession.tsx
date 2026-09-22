@@ -182,7 +182,7 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
         )}
       </button>
 
-      <div className="mt-4 flex items-center justify-between pr-14">
+      <div className="mt-4 flex items-center justify-between">
         <button
           type="button"
           onClick={handleBack}
