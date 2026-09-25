@@ -49,6 +49,7 @@ export function buildRosarySteps(mysteryType: MysteryType, selectedIndices: numb
       title: `${ORDINALS[mysteryIndex]} ${mysteryType} Mystery`,
       text: mystery.title,
       fruit: mystery.fruit,
+      scripture: mystery.scripture,
       reflection: mystery.reflection,
       artwork: mystery.artwork,
       progress: label,

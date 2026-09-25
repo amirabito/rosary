@@ -8,9 +8,15 @@ export interface Artwork {
   wikiQuery: string
 }
 
+export interface Scripture {
+  verse: string
+  reference: string
+}
+
 export interface Mystery {
   title: string
   fruit: string
+  scripture: Scripture
   reflection: string
   artwork: Artwork
 }
@@ -23,6 +29,7 @@ export interface RosaryStep {
   text: string
   reflection?: string
   fruit?: string
+  scripture?: Scripture
   artwork?: Artwork
   progress?: string
   /** 1-based position within the current bead group (e.g. 4th of 10 Hail Marys). */

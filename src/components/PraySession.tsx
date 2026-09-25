@@ -168,6 +168,12 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
           <div className="mt-4 space-y-4 rounded-xl border border-slate-800 bg-slate-900 p-5">
             {step.artwork && <MysteryArt key={step.text} artwork={step.artwork} />}
             <p className="text-center text-lg font-semibold text-brand-300">{step.text}</p>
+            {step.scripture && (
+              <p className="text-center text-sm italic leading-relaxed text-slate-400">
+                &ldquo;{step.scripture.verse}&rdquo;{' '}
+                <span className="not-italic text-slate-500">&mdash; {step.scripture.reference}</span>
+              </p>
+            )}
             {step.fruit && (
               <p className="text-center text-xs uppercase tracking-wide text-slate-500">
                 Fruit of the Mystery: <span className="text-slate-300">{step.fruit}</span>
