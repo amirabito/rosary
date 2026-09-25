@@ -75,13 +75,13 @@ function MysteryArt({ artwork }: { artwork: Artwork }) {
   if (failed || !src) return null
 
   return (
-    <figure className="-mx-5 -mt-5 mb-1 overflow-hidden rounded-t-xl">
+    <figure className="-mx-5 -mt-5 mb-1 overflow-hidden rounded-t-xl bg-slate-950">
       <img
         src={src}
         alt={`${artwork.title} by ${artwork.artist}`}
         loading="lazy"
         onError={() => setFailed(true)}
-        className="max-h-64 w-full object-cover"
+        className="max-h-[50vh] w-full object-contain"
       />
       <figcaption className="bg-slate-950/60 px-3 py-1.5 text-center text-[11px] italic text-slate-500">
         {artwork.artist}, <span className="not-italic">{artwork.title}</span>, {artwork.year}
