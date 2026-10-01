@@ -10,8 +10,57 @@ interface Props {
 
 interface WikiImageSearchResponse {
   query?: {
-    pages?: Record<string, { original?: { source?: string } }>
+    pages?: Record<string, { title?: string; index?: number; original?: { source?: string } }>
   }
+}
+
+const TITLE_STOPWORDS = new Set([
+  'the',
+  'of',
+  'in',
+  'at',
+  'with',
+  'and',
+  'a',
+  'an',
+  'to',
+  'on',
+  'painting',
+])
+
+function significantWords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length > 2 && !TITLE_STOPWORDS.has(w))
+}
+
+/**
+ * A loose text search always returns *some* top hit, even when it's the
+ * wrong painting (a different artist's version, a disambiguation page, an
+ * unrelated work). Only accept a candidate whose own page title contains the
+ * artist's surname — reject everything else rather than show a mismatch.
+ * Among surname-matching candidates, prefer ones that also share words with
+ * the painting's title.
+ */
+function pickBestMatch(
+  pages: Record<string, { title?: string; original?: { source?: string } }>,
+  artwork: Artwork,
+): string | null {
+  const surname = artwork.artist.trim().split(/\s+/).pop()?.toLowerCase() ?? ''
+  const titleWords = significantWords(artwork.title)
+
+  let best: { score: number; src: string } | null = null
+  for (const page of Object.values(pages)) {
+    const pageTitle = page.title?.toLowerCase() ?? ''
+    const src = page.original?.source
+    if (!src || !pageTitle || !surname) continue
+    if (!pageTitle.includes(surname)) continue
+
+    const score = titleWords.reduce((sum, w) => sum + (pageTitle.includes(w) ? 1 : 0), 0)
+    if (!best || score > best.score) best = { score, src }
+  }
+  return best?.src ?? null
 }
 
 function BeadRow({ current, total }: { current: number; total: number }) {
@@ -36,9 +85,10 @@ function BeadRow({ current, total }: { current: number; total: number }) {
 }
 
 /**
- * Looks up the artwork's image live via the Wikipedia API (rather than a
- * hardcoded file URL) so it doesn't depend on guessing an exact Commons file
- * name. Fails silently — the reflection text works fine with no image.
+ * Looks up the artwork's image live via the Wikipedia API and verifies the
+ * result against the expected artist/title before showing it. Fails silently
+ * (no image, no error) if nothing trustworthy is found — the reflection text
+ * works fine on its own.
  */
 function MysteryArt({ artwork }: { artwork: Artwork }) {
   const [src, setSrc] = useState<string | null>(null)
@@ -50,7 +100,7 @@ function MysteryArt({ artwork }: { artwork: Artwork }) {
     setFailed(false)
 
     const url =
-      'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=1&prop=pageimages&piprop=original&format=json&origin=*&gsrsearch=' +
+      'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=8&prop=pageimages&piprop=original&format=json&origin=*&gsrsearch=' +
       encodeURIComponent(artwork.wikiQuery)
 
     fetch(url)
@@ -58,8 +108,7 @@ function MysteryArt({ artwork }: { artwork: Artwork }) {
       .then((data) => {
         if (cancelled) return
         const pages = data.query?.pages
-        const page = pages ? Object.values(pages)[0] : undefined
-        const imageUrl = page?.original?.source
+        const imageUrl = pages ? pickBestMatch(pages, artwork) : null
         if (imageUrl) setSrc(imageUrl)
         else setFailed(true)
       })
