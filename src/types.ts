@@ -24,6 +24,14 @@ export interface Artwork {
   title: string
   artist: string
   year: string
+  /**
+   * A specific source the user has personally verified shows the right
+   * picture. When set, it's fetched directly — bypassing the search/match
+   * heuristic (and its failure modes) entirely. A Wikipedia page (fetched by
+   * exact title), a Wikidata item (its "image" claim, P18), or a direct image
+   * URL (e.g. copied from a non-Wikipedia site, used as-is).
+   */
+  pinned?: { wiki: string; title: string } | { wikidata: string } | { directUrl: string; caption?: string }
 }
 
 export interface Scripture {

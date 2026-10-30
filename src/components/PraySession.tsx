@@ -15,6 +15,16 @@ interface WikiImageSearchResponse {
   }
 }
 
+interface WikidataEntityResponse {
+  entities?: Record<
+    string,
+    {
+      claims?: { P18?: { mainsnak?: { datavalue?: { value?: string } } }[] }
+      labels?: { en?: { value?: string } }
+    }
+  >
+}
+
 const TITLE_STOPWORDS = new Set([
   'the',
   'of',
@@ -149,48 +159,96 @@ function BeadRow({ current, total }: { current: number; total: number }) {
  * lookup both resolves and passes the artist/title match check.
  */
 function MysteryArt({ artwork, symbol }: { artwork: Artwork; symbol: SymbolKey }) {
-  const [src, setSrc] = useState<string | null>(null)
+  const [result, setResult] = useState<{ src: string; caption: string } | null>(null)
   const [failed, setFailed] = useState(false)
+  const pinned = artwork.pinned
 
   useEffect(() => {
     let cancelled = false
-    setSrc(null)
+    setResult(null)
     setFailed(false)
 
-    const url =
-      'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=15&prop=pageimages&piprop=original&format=json&origin=*&gsrsearch=' +
-      encodeURIComponent(buildSearchQuery(artwork))
+    async function run() {
+      try {
+        if (pinned && 'directUrl' in pinned) {
+          // User-supplied direct image URL — used as-is, no fetch needed.
+          setResult({ src: pinned.directUrl, caption: pinned.caption ?? `${artwork.title}` })
+          return
+        }
 
-    fetch(url)
-      .then((res) => res.json() as Promise<WikiImageSearchResponse>)
-      .then((data) => {
-        if (cancelled) return
-        const pages = data.query?.pages
-        const imageUrl = pages ? pickBestMatch(pages, artwork) : null
-        if (imageUrl) setSrc(imageUrl)
-        else setFailed(true)
-      })
-      .catch(() => {
+        if (pinned && 'wikidata' in pinned) {
+          // User-verified Wikidata item — read its "image" (P18) claim
+          // directly, no search or matching heuristic involved.
+          const url =
+            `https://www.wikidata.org/w/api.php?action=wbgetentities&props=claims%7Clabels&languages=en&format=json&origin=*&ids=` +
+            encodeURIComponent(pinned.wikidata)
+          const data = (await (await fetch(url)).json()) as WikidataEntityResponse
+          const entity = data.entities?.[pinned.wikidata]
+          const filename = entity?.claims?.P18?.[0]?.mainsnak?.datavalue?.value
+          const caption = entity?.labels?.en?.value ?? artwork.title
+          if (!cancelled) {
+            if (filename) {
+              setResult({
+                src: `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=900`,
+                caption,
+              })
+            } else {
+              setFailed(true)
+            }
+          }
+          return
+        }
+
+        if (pinned && 'wiki' in pinned) {
+          // User-verified Wikipedia page — fetch it directly by exact title,
+          // no search or matching heuristic involved. Caption uses the
+          // page's own title (from the response), not an assumed artist/date.
+          const url =
+            `https://${pinned.wiki}.wikipedia.org/w/api.php?action=query&redirects=1&prop=pageimages&piprop=original&format=json&origin=*&titles=` +
+            encodeURIComponent(pinned.title)
+          const data = (await (await fetch(url)).json()) as WikiImageSearchResponse
+          const page = data.query?.pages ? Object.values(data.query.pages)[0] : undefined
+          const src = page?.original?.source
+          if (!cancelled) {
+            if (src) setResult({ src, caption: page?.title ?? pinned.title })
+            else setFailed(true)
+          }
+          return
+        }
+
+        const url =
+          'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=15&prop=pageimages&piprop=original&format=json&origin=*&gsrsearch=' +
+          encodeURIComponent(buildSearchQuery(artwork))
+        const data = (await (await fetch(url)).json()) as WikiImageSearchResponse
+        const src = data.query?.pages ? pickBestMatch(data.query.pages, artwork) : null
+        if (!cancelled) {
+          if (src) setResult({ src, caption: `${artwork.artist}, ${artwork.title}, ${artwork.year}` })
+          else setFailed(true)
+        }
+      } catch {
         if (!cancelled) setFailed(true)
-      })
+      }
+    }
+
+    run()
 
     return () => {
       cancelled = true
     }
-  }, [artwork.title, artwork.artist])
+  }, [artwork])
 
-  if (src && !failed) {
+  if (result && !failed) {
     return (
       <figure className="-mx-5 -mt-5 mb-1 overflow-hidden rounded-t-xl bg-slate-950">
         <img
-          src={src}
-          alt={`${artwork.title} by ${artwork.artist}`}
+          src={result.src}
+          alt={result.caption}
           loading="lazy"
           onError={() => setFailed(true)}
           className="max-h-[50vh] w-full object-contain"
         />
         <figcaption className="bg-slate-950/60 px-3 py-1.5 text-center text-[11px] italic text-slate-500">
-          {artwork.artist}, <span className="not-italic">{artwork.title}</span>, {artwork.year}
+          {result.caption}
         </figcaption>
       </figure>
     )
