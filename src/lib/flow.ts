@@ -52,6 +52,7 @@ export function buildRosarySteps(mysteryType: MysteryType, selectedIndices: numb
       scripture: mystery.scripture,
       reflection: mystery.reflection,
       artwork: mystery.artwork,
+      symbol: mystery.symbol,
       progress: label,
     })
 

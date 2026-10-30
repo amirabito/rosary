@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { buildRosarySteps } from '../lib/flow'
-import type { Artwork, MysteryType } from '../types'
+import { MysterySymbol } from './MysterySymbol'
+import type { Artwork, MysteryType, SymbolKey } from '../types'
 
 interface Props {
   mysteryType: MysteryType
@@ -28,34 +29,51 @@ const TITLE_STOPWORDS = new Set([
   'painting',
 ])
 
+const NAME_CONNECTORS = new Set(['da', 'di', 'de', 'del', 'della', 'van', 'von', 'the'])
+
+function stripAccents(text: string): string {
+  return text.normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
 function significantWords(text: string): string[] {
-  return text
+  return stripAccents(text)
     .toLowerCase()
     .split(/[^a-z0-9]+/)
     .filter((w) => w.length > 2 && !TITLE_STOPWORDS.has(w))
 }
 
+/** First/last names etc. a candidate page might plausibly use to refer to this artist — some
+ * artists (Leonardo, Michelangelo, Raphael, Titian) are conventionally disambiguated on
+ * Wikipedia by first name alone, so requiring the surname specifically would wrongly reject
+ * the correct page for them. */
+function artistNameTokens(artist: string): string[] {
+  return stripAccents(artist)
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !NAME_CONNECTORS.has(w))
+}
+
 /**
  * A loose text search always returns *some* top hit, even when it's the
  * wrong painting (a different artist's version, a disambiguation page, an
- * unrelated work). Only accept a candidate whose own page title contains the
- * artist's surname — reject everything else rather than show a mismatch.
- * Among surname-matching candidates, prefer ones that also share words with
- * the painting's title.
+ * unrelated work). Only accept a candidate whose own page title contains at
+ * least one of the artist's name tokens — reject everything else rather than
+ * show a mismatch. Among those, prefer ones that also share words with the
+ * painting's title.
  */
 function pickBestMatch(
   pages: Record<string, { title?: string; original?: { source?: string } }>,
   artwork: Artwork,
 ): string | null {
-  const surname = artwork.artist.trim().split(/\s+/).pop()?.toLowerCase() ?? ''
+  const nameTokens = artistNameTokens(artwork.artist)
   const titleWords = significantWords(artwork.title)
 
   let best: { score: number; src: string } | null = null
   for (const page of Object.values(pages)) {
-    const pageTitle = page.title?.toLowerCase() ?? ''
+    const pageTitle = stripAccents(page.title?.toLowerCase() ?? '')
     const src = page.original?.source
-    if (!src || !pageTitle || !surname) continue
-    if (!pageTitle.includes(surname)) continue
+    if (!src || !pageTitle || nameTokens.length === 0) continue
+    if (!nameTokens.some((t) => pageTitle.includes(t))) continue
 
     const score = titleWords.reduce((sum, w) => sum + (pageTitle.includes(w) ? 1 : 0), 0)
     if (!best || score > best.score) best = { score, src }
@@ -85,12 +103,12 @@ function BeadRow({ current, total }: { current: number; total: number }) {
 }
 
 /**
- * Looks up the artwork's image live via the Wikipedia API and verifies the
- * result against the expected artist/title before showing it. Fails silently
- * (no image, no error) if nothing trustworthy is found — the reflection text
- * works fine on its own.
+ * Always shows something for the mystery: a hand-drawn, fully offline symbol
+ * by default (guaranteed — no network dependency, so it can never be missing
+ * or mismatched), upgraded to the real painting only once a live Wikipedia
+ * lookup both resolves and passes the artist/title match check.
  */
-function MysteryArt({ artwork }: { artwork: Artwork }) {
+function MysteryArt({ artwork, symbol }: { artwork: Artwork; symbol: SymbolKey }) {
   const [src, setSrc] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
 
@@ -121,21 +139,27 @@ function MysteryArt({ artwork }: { artwork: Artwork }) {
     }
   }, [artwork.wikiQuery])
 
-  if (failed || !src) return null
+  if (src && !failed) {
+    return (
+      <figure className="-mx-5 -mt-5 mb-1 overflow-hidden rounded-t-xl bg-slate-950">
+        <img
+          src={src}
+          alt={`${artwork.title} by ${artwork.artist}`}
+          loading="lazy"
+          onError={() => setFailed(true)}
+          className="max-h-[50vh] w-full object-contain"
+        />
+        <figcaption className="bg-slate-950/60 px-3 py-1.5 text-center text-[11px] italic text-slate-500">
+          {artwork.artist}, <span className="not-italic">{artwork.title}</span>, {artwork.year}
+        </figcaption>
+      </figure>
+    )
+  }
 
   return (
-    <figure className="-mx-5 -mt-5 mb-1 overflow-hidden rounded-t-xl bg-slate-950">
-      <img
-        src={src}
-        alt={`${artwork.title} by ${artwork.artist}`}
-        loading="lazy"
-        onError={() => setFailed(true)}
-        className="max-h-[50vh] w-full object-contain"
-      />
-      <figcaption className="bg-slate-950/60 px-3 py-1.5 text-center text-[11px] italic text-slate-500">
-        {artwork.artist}, <span className="not-italic">{artwork.title}</span>, {artwork.year}
-      </figcaption>
-    </figure>
+    <div className="-mx-5 -mt-5 mb-1 flex flex-col items-center gap-2 rounded-t-xl bg-slate-950 py-6">
+      <MysterySymbol symbol={symbol} className="h-16 w-16 text-brand-400" />
+    </div>
   )
 }
 
@@ -215,7 +239,9 @@ export function PraySession({ mysteryType, selectedIndices, onExit }: Props) {
 
         {step.kind === 'announce' ? (
           <div className="mt-4 space-y-4 rounded-xl border border-slate-800 bg-slate-900 p-5">
-            {step.artwork && <MysteryArt key={step.text} artwork={step.artwork} />}
+            {step.artwork && step.symbol && (
+              <MysteryArt key={step.text} artwork={step.artwork} symbol={step.symbol} />
+            )}
             <p className="text-center text-lg font-semibold text-brand-300">{step.text}</p>
             {step.scripture && (
               <p className="text-center text-sm italic leading-relaxed text-slate-400">

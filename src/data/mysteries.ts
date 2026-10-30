@@ -37,6 +37,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1440–1445',
         wikiQuery: 'Fra Angelico Annunciation San Marco painting',
       },
+      symbol: 'lily',
     },
     {
       title: 'The Visitation',
@@ -53,6 +54,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1491',
         wikiQuery: 'Domenico Ghirlandaio The Visitation painting',
       },
+      symbol: 'heart',
     },
     {
       title: 'The Nativity',
@@ -69,6 +71,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1500',
         wikiQuery: 'Sandro Botticelli Mystic Nativity painting',
       },
+      symbol: 'star',
     },
     {
       title: 'The Presentation',
@@ -85,6 +88,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1342',
         wikiQuery: 'Ambrogio Lorenzetti Presentation at the Temple painting',
       },
+      symbol: 'candle',
     },
     {
       title: 'The Finding in the Temple',
@@ -101,6 +105,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1860',
         wikiQuery: 'William Holman Hunt The Finding of the Saviour in the Temple',
       },
+      symbol: 'scroll',
     },
   ],
   Sorrowful: [
@@ -119,6 +124,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1465',
         wikiQuery: 'Giovanni Bellini Agony in the Garden painting',
       },
+      symbol: 'olive-branch',
     },
     {
       title: 'The Scourging at the Pillar',
@@ -135,6 +141,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1607',
         wikiQuery: 'Caravaggio The Flagellation of Christ Capodimonte painting',
       },
+      symbol: 'pillar',
     },
     {
       title: 'The Crowning with Thorns',
@@ -151,6 +158,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1542',
         wikiQuery: 'Titian The Crowning with Thorns Louvre painting',
       },
+      symbol: 'thorn-crown',
     },
     {
       title: 'The Carrying of the Cross',
@@ -167,6 +175,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1565',
         wikiQuery: 'Titian Christ Carrying the Cross painting',
       },
+      symbol: 'cross-tilted',
     },
     {
       title: 'The Crucifixion',
@@ -183,6 +192,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1632',
         wikiQuery: 'Diego Velázquez Christ Crucified Prado painting',
       },
+      symbol: 'cross',
     },
   ],
   Glorious: [
@@ -201,6 +211,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1463–1465',
         wikiQuery: 'Piero della Francesca The Resurrection painting Sansepolcro',
       },
+      symbol: 'sunrise',
     },
     {
       title: 'The Ascension',
@@ -217,6 +228,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1636',
         wikiQuery: 'Rembrandt The Ascension of Christ painting',
       },
+      symbol: 'cloud',
     },
     {
       title: 'The Descent of the Holy Spirit',
@@ -233,6 +245,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1596–1600',
         wikiQuery: 'El Greco Pentecost painting Prado',
       },
+      symbol: 'dove',
     },
     {
       title: 'The Assumption of Mary',
@@ -249,6 +262,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1516–1518',
         wikiQuery: 'Titian Assumption of the Virgin Frari painting',
       },
+      symbol: 'moon-stars',
     },
     {
       title: 'The Coronation of Mary',
@@ -265,6 +279,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1641–1644',
         wikiQuery: 'Diego Velázquez The Coronation of the Virgin painting',
       },
+      symbol: 'crown',
     },
   ],
   Luminous: [
@@ -283,6 +298,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1448–1450',
         wikiQuery: 'Piero della Francesca The Baptism of Christ painting',
       },
+      symbol: 'dove',
     },
     {
       title: 'The Wedding at Cana',
@@ -299,6 +315,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1563',
         wikiQuery: 'Paolo Veronese The Wedding at Cana painting Louvre',
       },
+      symbol: 'chalice',
     },
     {
       title: 'The Proclamation of the Kingdom',
@@ -315,6 +332,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: 'c. 1886–1896',
         wikiQuery: 'James Tissot The Sermon of the Beatitudes painting',
       },
+      symbol: 'mountain',
     },
     {
       title: 'The Transfiguration',
@@ -331,6 +349,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1516–1520',
         wikiQuery: 'Raphael The Transfiguration painting Vatican',
       },
+      symbol: 'sunburst',
     },
     {
       title: 'The Institution of the Eucharist',
@@ -347,6 +366,7 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
         year: '1495–1498',
         wikiQuery: 'Leonardo da Vinci The Last Supper painting',
       },
+      symbol: 'chalice',
     },
   ],
 }
