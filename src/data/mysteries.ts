@@ -312,9 +312,14 @@ export const MYSTERIES: Record<MysteryType, Mystery[]> = {
       reflection:
         "Jesus begins His public ministry, calling all to repentance and announcing the Kingdom of God. Reflect on His invitation to conversion and mercy. Ask for the grace of ongoing repentance and trust in God's mercy.",
       artwork: {
-        title: 'The Sermon of the Beatitudes',
-        artist: 'James Tissot',
-        year: 'c. 1886–1896',
+        title: 'Christ Proclaims the Kingdom',
+        artist: 'French School',
+        year: '19th c., Bowyer Bible',
+        pinned: {
+          directUrl:
+            'https://commons.wikimedia.org/wiki/Special:FilePath/Luke_in_the_Bowyer_Bible_Christ_proclaims_the_kingdom_Luke_9_1-8_French_School.jpg',
+          caption: 'French School, Christ Proclaims the Kingdom (Luke 9:1–8), Bowyer Bible',
+        },
       },
       symbol: 'mountain',
     },
