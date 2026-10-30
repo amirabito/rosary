@@ -54,12 +54,14 @@ function artistNameTokens(artist: string): string[] {
 }
 
 /**
- * A loose text search always returns *some* top hit, even when it's the
- * wrong painting (a different artist's version, a disambiguation page, an
- * unrelated work). Only accept a candidate whose own page title contains at
- * least one of the artist's name tokens — reject everything else rather than
- * show a mismatch. Among those, prefer ones that also share words with the
- * painting's title.
+ * A loose text search always returns *some* top hit, even when it's wrong —
+ * a different artist's version, a disambiguation page, or (notably) the
+ * artist's own biography page, which trivially contains their name and has
+ * its own pageimage (a portrait), not the painting. So the artist's name
+ * alone is never enough: a candidate is only accepted if it ALSO shares at
+ * least one word with the painting's own title, or if the painting's full
+ * title (2+ words) matches on its own — many unique titles like "Mystic
+ * Nativity" aren't disambiguated by artist name at all on Wikipedia.
  */
 function pickBestMatch(
   pages: Record<string, { title?: string; original?: { source?: string } }>,
@@ -72,13 +74,31 @@ function pickBestMatch(
   for (const page of Object.values(pages)) {
     const pageTitle = stripAccents(page.title?.toLowerCase() ?? '')
     const src = page.original?.source
-    if (!src || !pageTitle || nameTokens.length === 0) continue
-    if (!nameTokens.some((t) => pageTitle.includes(t))) continue
+    if (!src || !pageTitle) continue
 
-    const score = titleWords.reduce((sum, w) => sum + (pageTitle.includes(w) ? 1 : 0), 0)
+    const titleOverlap = titleWords.filter((w) => pageTitle.includes(w)).length
+    const artistMatch = nameTokens.some((t) => pageTitle.includes(t))
+    const fullTitleMatch = titleWords.length >= 2 && titleOverlap === titleWords.length
+    const artistWithTitle = artistMatch && titleOverlap >= 1
+
+    if (!fullTitleMatch && !artistWithTitle) continue
+
+    const score = titleOverlap * 2 + (artistMatch ? 1 : 0) + (fullTitleMatch ? 3 : 0)
     if (!best || score > best.score) best = { score, src }
   }
   return best?.src ?? null
+}
+
+/** Builds a Wikipedia search query that looks for pages whose own title contains
+ * the painting's distinctive words (intitle:), rather than a loose full-text
+ * search — far less likely to surface an unrelated page that merely mentions
+ * the right words somewhere in its body. The artist's name is added as a
+ * plain (non-scoped) term to help rank among any multiple matching titles. */
+function buildSearchQuery(artwork: Artwork): string {
+  const intitleClauses = significantWords(artwork.title)
+    .map((w) => `intitle:${w}`)
+    .join(' ')
+  return `${intitleClauses} ${artwork.artist}`.trim()
 }
 
 function BeadRow({ current, total }: { current: number; total: number }) {
@@ -118,8 +138,8 @@ function MysteryArt({ artwork, symbol }: { artwork: Artwork; symbol: SymbolKey }
     setFailed(false)
 
     const url =
-      'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=8&prop=pageimages&piprop=original&format=json&origin=*&gsrsearch=' +
-      encodeURIComponent(artwork.wikiQuery)
+      'https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=15&prop=pageimages&piprop=original&format=json&origin=*&gsrsearch=' +
+      encodeURIComponent(buildSearchQuery(artwork))
 
     fetch(url)
       .then((res) => res.json() as Promise<WikiImageSearchResponse>)
@@ -137,7 +157,7 @@ function MysteryArt({ artwork, symbol }: { artwork: Artwork; symbol: SymbolKey }
     return () => {
       cancelled = true
     }
-  }, [artwork.wikiQuery])
+  }, [artwork.title, artwork.artist])
 
   if (src && !failed) {
     return (

@@ -24,8 +24,6 @@ export interface Artwork {
   title: string
   artist: string
   year: string
-  /** Search query used to find the artwork's image live via the Wikipedia API. */
-  wikiQuery: string
 }
 
 export interface Scripture {
