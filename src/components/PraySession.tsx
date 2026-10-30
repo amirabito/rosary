@@ -29,7 +29,27 @@ const TITLE_STOPWORDS = new Set([
   'painting',
 ])
 
-const NAME_CONNECTORS = new Set(['da', 'di', 'de', 'del', 'della', 'van', 'von', 'the'])
+const NAME_CONNECTORS = new Set([
+  'da',
+  'di',
+  'de',
+  'del',
+  'della',
+  'van',
+  'von',
+  'the',
+  // Religious/noble honorifics — short enough to otherwise pass the length
+  // filter, but not a distinguishing part of the artist's name (e.g. "Fra"
+  // in "Fra Angelico" could otherwise false-match any title containing the
+  // substring "fra", such as "Frari", the church housing an unrelated work).
+  'fra',
+  'fray',
+  'san',
+  'santa',
+  'st',
+  'sir',
+  'don',
+])
 
 function stripAccents(text: string): string {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '')
